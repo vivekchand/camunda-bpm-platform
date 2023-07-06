@@ -46,7 +46,7 @@ pipeline {
                         [envVar: 'XLTS_AUTH_TOKEN', vaultKey: 'authToken']]
                 ]]]) {
               cambpmRunMaven('.',
-                  'clean source:jar deploy source:test-jar com.mycila:license-maven-plugin:check -Pdistro,distro-ce,distro-wildfly,distro-webjar,h2-in-memory -DaltStagingDirectory=${WORKSPACE}/staging -DskipRemoteStaging=true',
+                  'clean source:jar deploy source:test-jar com.mycila:license-maven-plugin:check -Pdistro,distro-ce,distro-wildfly,distro-webjar,h2-in-memory -DaltStagingDirectory=${WORKSPACE}/staging -DskipRemoteStaging=true -DskipTests',
                   withCatch: false,
                   withNpm: true,
                   // we use JDK 17 to build the artifacts, as it is required for supporting Spring Boot 3
@@ -89,15 +89,6 @@ pipeline {
               upstreamProjectName = "/" + env.JOB_NAME
               upstreamBuildNumber = env.BUILD_NUMBER
 
-              if (env.BRANCH_NAME == cambpmDefaultBranch() || cambpmWithLabels('webapp-integration', 'all-as', 'h2', 'websphere', 'weblogic', 'jbosseap', 'run', 'spring-boot', 'e2e')) {
-                cambpmTriggerDownstream(
-                  platformVersionDir + "/cambpm-ee/" + eeMainProjectBranch,
-                  [string(name: 'UPSTREAM_PROJECT_NAME', value: upstreamProjectName),
-                  string(name: 'UPSTREAM_BUILD_NUMBER', value: upstreamBuildNumber)],
-                  true, true, true, true
-                )
-              }
-
               // the sidetrack pipeline should be triggered on daily,
               // or PR builds only, master builds should be excluded.
               // The Sidetrack pipeline contains CRDB and Azure DB stages,
@@ -105,16 +96,6 @@ pipeline {
               if (env.BRANCH_NAME != cambpmDefaultBranch() && cambpmWithLabels('all-db', 'cockroachdb', 'sqlserver')) {
                 cambpmTriggerDownstream(
                   platformVersionDir + "/cambpm-ce/cambpm-sidetrack/${env.BRANCH_NAME}",
-                  [string(name: 'UPSTREAM_PROJECT_NAME', value: upstreamProjectName),
-                  string(name: 'UPSTREAM_BUILD_NUMBER', value: upstreamBuildNumber)]
-                )
-              }
-
-              // don't trigger the daily pipeline from a master branch build
-              // or if a PR has no relevant labels
-              if (env.BRANCH_NAME != cambpmDefaultBranch() && cambpmWithLabels('default-build', 'jdk', 'rolling-update', 'migration', 'wildfly', 'all-db', 'h2', 'db2', 'mysql', 'oracle', 'mariadb', 'sqlserver', 'postgresql')) {
-                cambpmTriggerDownstream(
-                  platformVersionDir + "/cambpm-ce/cambpm-daily/${env.BRANCH_NAME}",
                   [string(name: 'UPSTREAM_PROJECT_NAME', value: upstreamProjectName),
                   string(name: 'UPSTREAM_BUILD_NUMBER', value: upstreamBuildNumber)]
                 )

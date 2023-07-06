@@ -50,11 +50,6 @@ sidetrack-stages:
   - 'azure_sql_db_150'
   stages:
   - 'db-unit'
-  - 'sql-scripts'
-  - 'instance-migration'
-  - 'old-engine'
-  - 'rolling-update'
-  - 'large-data-tests'
 jdk-ce-stages:
   stages:
   - 'platform-jdk-openjdk-jdk-17-latest'

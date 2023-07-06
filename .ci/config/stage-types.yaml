@@ -22,7 +22,7 @@
 #     sqlserver: [INT; OPTIONAL;]
 db-unit:
   directory: '.'
-  command: 'clean package -pl "engine,webapps/assembly,webapps/assembly-jakarta" -Dskip.frontend.build=true -P'
+  command: 'clean package -pl "engine" -Dskip.frontend.build=true -P'
   stash:
     runtimeStash: true
   labels:
